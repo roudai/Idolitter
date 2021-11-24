@@ -19,7 +19,7 @@ function Twitter取得() {
     if(!getUserInformation(sheet.getRange(i,6,getNum,1).getValues().join(), i, getNum)){
       for(let j = 0; j < 100 ; j = j + 10){
         getNum = lastRow % 10
-        if(!getUserInformation(sheet.getRange(i + j ,6,10,1).getValues().join(), i + j, 10)){
+        if(!getUserInformation(sheet.getRange(i + j ,6,getNum,1).getValues().join(), i + j, getNum)){
           for(let k = 0; k < 10; k = k + 1){
             if(!getUserInformation(sheet.getRange(i + j + k ,6).getValue(), i + j + k, 1)){
                 sheet.getRange(i + j + k ,6).setBackground('#00ffff')
