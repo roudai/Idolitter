@@ -16,6 +16,7 @@ function Twitter取得() {
   let lastRow = sheet.getLastRow();
   sheet.getRange(1,7,lastRow,6).clearContent();
 
+  let twitterInfo = [];
   // 100件ごとにTwitter情報取得
   for(let i = 1; i <= lastRow; i = i + 100){
     let getNum;
@@ -24,7 +25,7 @@ function Twitter取得() {
     }else{
       getNum = lastRow % 100;
     }
-    if(!getUserInformation(sheet.getRange(i,6,getNum,1).getValues().join(), i, getNum)){
+    if(!getUserInformation(twitterInfo, sheet.getRange(i,6,getNum,1).getValues().join(), i, getNum)){
       // 100件で失敗した場合、10件ごとに取得
       for(let j = 0; j < 100 ; j = j + 10){
         if(lastRow - i - j >= 10 || lastRow % 10 == 0){
@@ -32,18 +33,21 @@ function Twitter取得() {
         }else{
           getNum = lastRow % 10;
         }
-        if(!getUserInformation(sheet.getRange(i + j ,6,getNum,1).getValues().join(), i + j, getNum)){
+        if(!getUserInformation(twitterInfo, sheet.getRange(i + j ,6,getNum,1).getValues().join(), i + j, getNum)){
           // 10件で失敗した場合、1件ずつ取得
           for(let k = 0; k < 10; k = k + 1){
-            if(!getUserInformation(sheet.getRange(i + j + k ,6).getValue(), i + j + k, 1)){
-                sheet.getRange(i + j + k,1,1,12).setBackground('#00ffff');
-                Logger.log("No." + (i + j + k + 1) + " " + sheet.getRange(i + j + k,6).getValue());
+            if(!getUserInformation(twitterInfo, sheet.getRange(i + j + k ,6).getValue(), i + j + k, 1)){
+              twitterInfo.push([null,null,null,null,null,null])
+              sheet.getRange(i + j + k,1,1,12).setBackground('#00ffff');
+              Logger.log("No." + (i + j + k + 1) + " " + sheet.getRange(i + j + k,6).getValue());
             }
           }
         }
       }
     }
   }
+  // 全データ貼り付け
+  sheet.getRange(1,7,lastRow,6).setValues(twitterInfo);
 
   // ヘッダー、フィルター挿入
   sheet.insertRowsBefore(1,1);
@@ -83,7 +87,7 @@ function Twitter取得() {
   diffSheet.getRange("N1:Q1").setBackground('#ffd700'); personSheet.getRange("N1:Q1").setFontWeight("bold");
 }
 
-function getUserInformation(twitterIDs, startRow, num){
+function getUserInformation(twitterInfo, twitterIDs, startRow, num){
   let url = "https://api.twitter.com/2/users/by?usernames=" + twitterIDs + "&user.fields=public_metrics,description,verified,protected";
   let options = {
     "method": "get",
@@ -95,7 +99,7 @@ function getUserInformation(twitterIDs, startRow, num){
   if(response["errors"]){
     return false;
   }
-  let twitterInfo = [];
+  
   for(let i = 0; i < num; i++){   
     let name = response["data"][i]["name"];
     let followers_count = response["data"][i]["public_metrics"]["followers_count"];
@@ -108,6 +112,5 @@ function getUserInformation(twitterIDs, startRow, num){
 
     twitterInfo.push([name,followers_count,tweet_count,verified,protected,description])
   }
-  SpreadsheetApp.getActiveSpreadsheet().getSheetByName('アイドル一覧').getRange(startRow,7,num,6).setValues(twitterInfo);
   return true;
 }
