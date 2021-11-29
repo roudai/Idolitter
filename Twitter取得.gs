@@ -5,20 +5,20 @@ function Twitter取得() {
   // 現データコピー
   sheet.getRange("A:A").copyTo(diffSheet.getRange("A:A"));
   sheet.getRange("F:I").copyTo(diffSheet.getRange("B:E"));
-  diffSheet.getRange("A1:E1").setBackground('#adff2f')
+  diffSheet.getRange("A1:E1").setBackground('#adff2f');
 
   // ヘッダー削除
   if(sheet.getRange("A1").getValue() == "グループ名"){
-    sheet.deleteRow(1)
+    sheet.deleteRow(1);
   }
 
 　// 最終行取得、現データ削除
   let lastRow = sheet.getLastRow();
-  sheet.getRange(1,7,lastRow,5).clearContent();
+  sheet.getRange(1,7,lastRow,6).clearContent();
 
   // 100件ごとにTwitter情報取得
   for(let i = 1; i <= lastRow; i = i + 100){
-    let getNum
+    let getNum;
     if(lastRow - i >= 100 || lastRow % 100 == 0){
       getNum = 100;
     }else{
@@ -28,16 +28,16 @@ function Twitter取得() {
       // 100件で失敗した場合、10件ごとに取得
       for(let j = 0; j < 100 ; j = j + 10){
         if(lastRow - i - j >= 10 || lastRow % 10 == 0){
-          getNum = 10
+          getNum = 10;
         }else{
-          getNum = lastRow % 10
+          getNum = lastRow % 10;
         }
         if(!getUserInformation(sheet.getRange(i + j ,6,getNum,1).getValues().join(), i + j, getNum)){
           // 10件で失敗した場合、1件ずつ取得
           for(let k = 0; k < 10; k = k + 1){
             if(!getUserInformation(sheet.getRange(i + j + k ,6).getValue(), i + j + k, 1)){
-                sheet.getRange(i + j + k ,6).setBackground('#00ffff')
-                Logger.log(sheet.getRange(i + j + k ,6).getValue())
+                sheet.getRange(i + j + k,1,1,12).setBackground('#00ffff');
+                Logger.log("No." + (i + j + k + 1) + " " + sheet.getRange(i + j + k,6).getValue());
             }
           }
         }
@@ -47,9 +47,9 @@ function Twitter取得() {
 
   // ヘッダー、フィルター挿入
   sheet.insertRowsBefore(1,1);
-  sheet.getRange("A1:K1").setValues([['グループ名','名字','名前','名字読み','名前読み','TwitterID','TwitterName','フォロワー数','ツイート数','認証','Twitterプロフィール']]);
-  sheet.getRange("A1:K1").setBackground('#ffd700');
-  sheet.getRange(1,1,lastRow + 1,11).createFilter();
+  sheet.getRange("A1:L1").setValues([['グループ名','名字','名前','名字読み','名前読み','TwitterID','TwitterName','フォロワー数','ツイート数','認証','非公開','Twitterプロフィール']]);
+  sheet.getRange("A1:L1").setBackground('#ffd700');
+  sheet.getRange(1,1,lastRow + 1,12).createFilter();
 
   // データ集計-グループ
   const groupSheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName('データ集計-グループ');
@@ -84,7 +84,7 @@ function Twitter取得() {
 }
 
 function getUserInformation(twitterIDs, startRow, num){
-  let url = "https://api.twitter.com/2/users/by?usernames=" + twitterIDs + "&user.fields=public_metrics,description,verified";
+  let url = "https://api.twitter.com/2/users/by?usernames=" + twitterIDs + "&user.fields=public_metrics,description,verified,protected";
   let options = {
     "method": "get",
     "headers": {
@@ -100,12 +100,14 @@ function getUserInformation(twitterIDs, startRow, num){
     let name = response["data"][i]["name"];
     let followers_count = response["data"][i]["public_metrics"]["followers_count"];
     let tweet_count = response["data"][i]["public_metrics"]["tweet_count"];
-    let verified = response["data"][i]["verified"]
-    if (verified) {verified = "認証"} else {verified = ""}
+    let verified = response["data"][i]["verified"];
+    if (verified) {verified = "認証"} else {verified = ""};
+    let protected = response["data"][i]["protected"];
+    if (protected) {protected = "非公開"} else {protected = ""};
     let description = response["data"][i]["description"].replace(/[\r\n]+/g," ");
 
-    twitterInfo.push([name,followers_count,tweet_count,verified,description])
+    twitterInfo.push([name,followers_count,tweet_count,verified,protected,description])
   }
-  SpreadsheetApp.getActiveSpreadsheet().getSheetByName('アイドル一覧').getRange(startRow,7,num,5).setValues(twitterInfo);
+  SpreadsheetApp.getActiveSpreadsheet().getSheetByName('アイドル一覧').getRange(startRow,7,num,6).setValues(twitterInfo);
   return true;
 }
