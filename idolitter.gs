@@ -1,5 +1,3 @@
-var endpoint2 = "https://api.twitter.com/2/tweets";
-
 function postUpdateStatus() {
   var message = {
     text: generatePostMessage()
@@ -10,16 +8,17 @@ function postUpdateStatus() {
     'contentType': 'application/json',
     'payload': JSON.stringify(message)
   }
-  var response = twitter.getService().fetch(endpoint2, options);
-  Logger.log(response)
+  // ツイートする
+  // var response = twitter.getService().fetch("https://api.twitter.com/2/tweets", options);
+  // Logger.log(response);
+  Logger.log(generatePostMessage());
 }
 
 function generatePostMessage(){
   var sh = SpreadsheetApp.getActiveSpreadsheet().getSheetByName("アイドル一覧");
-  var rand = Math.floor( Math.random() * (sh.getLastRow() - 2) + 2 )
+  var rand = Math.floor(Math.random() * (sh.getLastRow() - 2) + 2);
 
   var group = sh.getRange(rand,1).getValue();
-  var name = sh.getRange(rand,7).getValue();
   var twitterID = sh.getRange(rand,6).getValue();
 
   var url = "https://api.twitter.com/2/users/by?usernames=" + twitterID + "&expansions=pinned_tweet_id";
@@ -30,7 +29,21 @@ function generatePostMessage(){
     },
   };
   var response = JSON.parse(UrlFetchApp.fetch(url, options));
-  var pinned = "https://twitter.com/" + twitterID + "/status/" + response["data"][0]["pinned_tweet_id"]
+  var name = response["data"][0]["name"];
+  var id = response["data"][0]["id"];
+  var pinned_tweet_id = response["data"][0]["pinned_tweet_id"];
 
-  return group + ' | ' + name + ' @' + twitterID + ' ' + pinned;
+  if (pinned_tweet_id){
+    // 固定ツイート
+    var pinned_tweet = "https://twitter.com/" + twitterID + "/status/" + pinned_tweet_id;
+    return name + ' | ' + group + ' ' + pinned_tweet;
+  } else {
+    // 固定ツイートがない場合、最新ツイート
+    var url = "https://api.twitter.com/2/users/" + id + "/tweets?max_results=5";
+    var response = JSON.parse(UrlFetchApp.fetch(url, options));
+    var latestTweet = "https://twitter.com/" + twitterID + "/status/" + response["data"][0]["id"];
+    return name + ' | ' + group + ' ' + latestTweet;
+  }
+
+  
 }

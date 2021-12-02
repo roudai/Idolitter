@@ -1,4 +1,4 @@
-function Twitter取得() {
+function getAllInformation() {
   const sheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName('アイドル一覧');
   const diffSheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName('取得差分');
 
@@ -12,7 +12,9 @@ function Twitter取得() {
 
 　// 最終行取得、現データ削除
   var lastRow = sheet.getLastRow();
-  sheet.getFilter().remove();
+  if (sheet.getFilter()){
+     sheet.getFilter().remove();
+  }
   sheet.getRange(2,7,lastRow - 1,6).clearContent();
 
   var twitterInfo = [];
@@ -24,7 +26,7 @@ function Twitter取得() {
     }else{
       getNum = lastRow % 100 - 1;
     }
-    if(!getUserInformation(twitterInfo, sheet.getRange(i + 1,6,getNum,1).getValues().join(), i, getNum)){
+    if(!getTwitterInformation(twitterInfo, sheet.getRange(i + 1,6,getNum,1).getValues().join(), i, getNum)){
       // 100件で失敗した場合、10件ごとに取得
       for(var j = 0; j < 100 ; j = j + 10){
         if(lastRow - i - j >= 10 || lastRow % 10 == 0){
@@ -32,10 +34,10 @@ function Twitter取得() {
         }else{
           getNum = lastRow % 10 - 1;
         }
-        if(!getUserInformation(twitterInfo, sheet.getRange(i + j + 1,6,getNum,1).getValues().join(), i + j, getNum)){
+        if(!getTwitterInformation(twitterInfo, sheet.getRange(i + j + 1,6,getNum,1).getValues().join(), i + j, getNum)){
           // 10件で失敗した場合、1件ずつ取得
           for(var k = 0; k < 10; k = k + 1){
-            if(!getUserInformation(twitterInfo, sheet.getRange(i + j + k + 1,6).getValue(), i + j + k, 1)){
+            if(!getTwitterInformation(twitterInfo, sheet.getRange(i + j + k + 1,6).getValue(), i + j + k, 1)){
               twitterInfo.push([null,null,null,null,null,null])
               sheet.getRange(i + j + k + 1,1,1,12).setBackground('#00ffff');
               Logger.log("No." + (i + j + k + 1) + " " + sheet.getRange(i + j + k　+ 1,6).getValue());
@@ -83,7 +85,7 @@ function Twitter取得() {
   diffSheet.getRange("N1:Q1").setBackground('#ffd700'); personSheet.getRange("N1:Q1").setFontWeight("bold");
 }
 
-function getUserInformation(twitterInfo, twitterIDs, startRow, num){
+function getTwitterInformation(twitterInfo, twitterIDs, startRow, num){
   var url = "https://api.twitter.com/2/users/by?usernames=" + twitterIDs + "&user.fields=public_metrics,description,verified,protected";
   var options = {
     "method": "get",
