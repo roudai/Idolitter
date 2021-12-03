@@ -1,15 +1,30 @@
 function postUpdateStatus() {
+  var postInfo = generatePostMessage()
+
+  // ツイート
   var message = {
-    text: generatePostMessage()
+    text: postInfo[0]
   }
-  var options = {
+  var options_tweet = {
     "method": "post",
     "muteHttpExceptions" : true,
     'contentType': 'application/json',
     'payload': JSON.stringify(message)
   }
-  // ツイートする
-  var response = twitter.getService().fetch("https://api.twitter.com/2/tweets", options);
+  var response = twitter.getService().fetch("https://api.twitter.com/2/tweets", options_tweet);
+  Logger.log(response);
+
+  // フォロー
+  var target = {
+    target_user_id: postInfo[1]
+  }
+  var options_follow = {
+    "method": "post",
+    "muteHttpExceptions" : true,
+    'contentType': 'application/json',
+    'payload': JSON.stringify(target)
+  }
+  var response = twitter.getService().fetch("https://api.twitter.com/2/users/1458460477630353409/following", options_follow);
   Logger.log(response);
 }
 
@@ -35,14 +50,12 @@ function generatePostMessage(){
   if (pinned_tweet_id){
     // 固定ツイート
     var pinned_tweet = "https://twitter.com/" + twitterID + "/status/" + pinned_tweet_id;
-    return name + ' | ' + group + ' ' + pinned_tweet;
+    return [name + ' | ' + group + ' ' + pinned_tweet, id];
   } else {
     // 固定ツイートがない場合、最新ツイート
     var url = "https://api.twitter.com/2/users/" + id + "/tweets?max_results=5";
     var response = JSON.parse(UrlFetchApp.fetch(url, options));
     var latestTweet = "https://twitter.com/" + twitterID + "/status/" + response["data"][0]["id"];
-    return name + ' | ' + group + ' ' + latestTweet;
+    return [name + ' | ' + group + ' ' + latestTweet, id];
   }
-
-  
 }
