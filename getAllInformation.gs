@@ -21,17 +21,20 @@ function getAllInformation() {
   // 100件ごとにTwitter情報取得
   for(var i = 1; i <= lastRow; i = i + 100){
     var getNum;
-    if(lastRow - i - 1 >= 100 || lastRow % 100 - 1 == 0){
+    if(lastRow - i - 1 >= 100 || lastRow % 100 == 1){
       getNum = 100;
+    }else if(lastRow % 100 == 0){
+      getNum = 99;
     }else{
       getNum = lastRow % 100 - 1;
-      if(getNum < 0){getNum = 99}
     }
     if(!getTwitterInformation(twitterInfo, sheet.getRange(i + 1,6,getNum,1).getValues().join(), i, getNum)){
       // 100件で失敗した場合、10件ごとに取得
       for(var j = 0; j < 100 ; j = j + 10){
-        if(lastRow - i - j >= 10 || lastRow % 10 == 0){
+        if(lastRow - i - j >= 10 || lastRow % 10 == 1){
           getNum = 10;
+        }else if(lastRow % 10 == 0){
+          getNum = 9;
         }else{
           getNum = lastRow % 10 - 1;
           if(getNum < 0){getNum = 9}
