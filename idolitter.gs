@@ -43,7 +43,7 @@ function generatePostMessage(){
     },
   };
   var response = JSON.parse(UrlFetchApp.fetch(url, options));
-  var name = response["data"][0]["name"];
+  var name = response["data"][0]["name"].replace("@"," ");
   var id = response["data"][0]["id"];
   var pinned_tweet_id = response["data"][0]["pinned_tweet_id"];
 
