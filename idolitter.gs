@@ -9,9 +9,8 @@ function postUpdateStatus() {
     'payload': JSON.stringify(message)
   }
   // ツイートする
-  // var response = twitter.getService().fetch("https://api.twitter.com/2/tweets", options);
-  // Logger.log(response);
-  Logger.log(message);
+  var response = twitter.getService().fetch("https://api.twitter.com/2/tweets", options);
+  Logger.log(response);
 }
 
 function generatePostMessage(){
@@ -32,7 +31,6 @@ function generatePostMessage(){
   var name = response["data"][0]["name"];
   var id = response["data"][0]["id"];
   var pinned_tweet_id = response["data"][0]["pinned_tweet_id"];
-  Logger.log(name);
 
   if (pinned_tweet_id){
     // 固定ツイート

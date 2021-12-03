@@ -27,7 +27,6 @@ function getAllInformation() {
       getNum = lastRow % 100 - 1;
       if(getNum < 0){getNum = 99}
     }
-    Logger.log(getNum)
     if(!getTwitterInformation(twitterInfo, sheet.getRange(i + 1,6,getNum,1).getValues().join(), i, getNum)){
       // 100件で失敗した場合、10件ごとに取得
       for(var j = 0; j < 100 ; j = j + 10){
@@ -61,9 +60,8 @@ function getAllInformation() {
   groupSheet.getRange("A1").setValue("=query('アイドル一覧'!$A$1:$K$" + (lastRow + 1) + ",\"select A,avg(H),count(A) group by A order by avg(H) desc label A 'グループ名',avg(H) '平均フォロワー数',count(A) 'メンバー数' format avg(H) '#'\")");
   groupSheet.getRange("E1").setValue("=query('アイドル一覧'!$A$1:$K$" + (lastRow + 1) + ",\"select A,max(H)/min(H),count(A) group by A order by max(H)/min(H) desc label A 'グループ名',max(H)/min(H) 'フォロワー数最大/最小',count(A) 'メンバー数' format max(H)/min(H) '#.00'\")");
   groupSheet.getRange("I1").setValue("=query('アイドル一覧'!$A$1:$K$" + (lastRow + 1) + ",\"select A,avg(I),count(A) group by A order by avg(I) desc label A 'グループ名',avg(I) '平均ツイート数',count(A) 'メンバー数' format avg(I) '#'\")");
-  groupSheet.getRange("A1:C1").setBackground('#ffd700'); groupSheet.getRange("A1:C1").setFontWeight("bold");
-  groupSheet.getRange("E1:G1").setBackground('#ffd700'); groupSheet.getRange("E1:G1").setFontWeight("bold");
-  groupSheet.getRange("I1:K1").setBackground('#ffd700'); groupSheet.getRange("I1:K1").setFontWeight("bold");
+  groupSheet.getRangeList(["A1:C1","E1:G1","I1:K1"]).setBackground('#ffd700');
+  groupSheet.getRangeList(["A1:C1","E1:G1","I1:K1"]).setFontWeight("bold");
 
   // データ集計-個人
   const personSheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName('データ集計-個人');
@@ -73,19 +71,15 @@ function getAllInformation() {
   personSheet.getRange("J1").setValue("=query('アイドル一覧'!$A$1:$K$" + lastRow + ",\"select E,count(E) group by E order by count(E) desc limit 30 label E '名前読み', count(E) '人数'\")");
   personSheet.getRange("M1").setValue("=query('アイドル一覧'!$A$1:$K$" + lastRow + ",\"select A,G,F,H order by H desc limit 100 label A 'グループ名',G '名前',F 'Twitter ID',H 'フォロワー数'\")");
   personSheet.getRange("R1").setValue("=query('アイドル一覧'!$A$1:$K$" + lastRow + ",\"select A,G,F,I order by I desc limit 100 label A 'グループ名',G '名前',F 'Twitter ID',I 'ツイート数'\")");
-  personSheet.getRange("A1:B1").setBackground('#ffd700'); personSheet.getRange("A1:B1").setFontWeight("bold");
-  personSheet.getRange("D1:E1").setBackground('#ffd700'); personSheet.getRange("D1:E1").setFontWeight("bold");
-  personSheet.getRange("G1:H1").setBackground('#ffd700'); personSheet.getRange("G1:H1").setFontWeight("bold");
-  personSheet.getRange("J1:K1").setBackground('#ffd700'); personSheet.getRange("J1:K1").setFontWeight("bold");
-  personSheet.getRange("M1:P1").setBackground('#ffd700'); personSheet.getRange("M1:P1").setFontWeight("bold");
-  personSheet.getRange("R1:U1").setBackground('#ffd700'); personSheet.getRange("R1:U1").setFontWeight("bold");
+  personSheet.getRangeList(["A1:B1","D1:E1","G1:H1","J1:K1","M1:P1","R1:U1"]).setBackground('#ffd700');
+  personSheet.getRangeList(["A1:B1","D1:E1","G1:H1","J1:K1","M1:P1","R1:U1"]).setFontWeight("bold");
 
   // 取得差分
   sheet.getRange("H:I").copyTo(diffSheet.getRange("F:G"));
   diffSheet.getRange("I1").setValue("=query($A$1:$G$" + lastRow + ",\"select A,B,C,F-D order by F-D desc label F-D 'フォロワー増減'\")");
   diffSheet.getRange("N1").setValue("=query($A$1:$G$" + lastRow + ",\"select A,B,C,G-E order by G-E desc label G-E 'ツイート増減'\")");
-  diffSheet.getRange("I1:L1").setBackground('#ffd700'); personSheet.getRange("I1:L1").setFontWeight("bold");
-  diffSheet.getRange("N1:Q1").setBackground('#ffd700'); personSheet.getRange("N1:Q1").setFontWeight("bold");
+  diffSheet.getRangeList(["I1:L1","N1:Q1"]).setBackground('#ffd700');
+  diffSheet.getRangeList(["I1:L1","N1:Q1"]).setFontWeight("bold");
 }
 
 function getTwitterInformation(twitterInfo, twitterIDs, startRow, num){
