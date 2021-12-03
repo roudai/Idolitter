@@ -21,11 +21,13 @@ function getAllInformation() {
   // 100件ごとにTwitter情報取得
   for(var i = 1; i <= lastRow; i = i + 100){
     var getNum;
-    if(lastRow - i >= 100 || lastRow % 100 == 0){
+    if(lastRow - i - 1 >= 100 || lastRow % 100 - 1 == 0){
       getNum = 100;
     }else{
       getNum = lastRow % 100 - 1;
+      if(getNum < 0){getNum = 99}
     }
+    Logger.log(getNum)
     if(!getTwitterInformation(twitterInfo, sheet.getRange(i + 1,6,getNum,1).getValues().join(), i, getNum)){
       // 100件で失敗した場合、10件ごとに取得
       for(var j = 0; j < 100 ; j = j + 10){
@@ -33,6 +35,7 @@ function getAllInformation() {
           getNum = 10;
         }else{
           getNum = lastRow % 10 - 1;
+          if(getNum < 0){getNum = 9}
         }
         if(!getTwitterInformation(twitterInfo, sheet.getRange(i + j + 1,6,getNum,1).getValues().join(), i + j, getNum)){
           // 10件で失敗した場合、1件ずつ取得
@@ -89,6 +92,7 @@ function getTwitterInformation(twitterInfo, twitterIDs, startRow, num){
   var url = "https://api.twitter.com/2/users/by?usernames=" + twitterIDs + "&user.fields=public_metrics,description,verified,protected";
   var options = {
     "method": "get",
+    "muteHttpExceptions" : true,
     "headers": {
       "authorization": "Bearer " + PropertiesService.getScriptProperties().getProperty('BearerToken')
     },
