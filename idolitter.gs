@@ -53,9 +53,13 @@ function generatePostMessage(){
     return [name + ' | ' + group + ' ' + pinned_tweet, id];
   } else {
     // 固定ツイートがない場合、最新ツイート
-    var url = "https://api.twitter.com/2/users/" + id + "/tweets?max_results=5";
+    var url = "https://api.twitter.com/2/users/" + id + "/tweets?max_results=100";
     var response = JSON.parse(UrlFetchApp.fetch(url, options));
-    var latestTweet = "https://twitter.com/" + twitterID + "/status/" + response["data"][0]["id"];
-    return [name + ' | ' + group + ' ' + latestTweet, id];
+    for(var i = 0; i <= 100; i = i + 1){
+      if(!response["data"][i]["text"].match(/@/)){
+        var latestTweet = "https://twitter.com/" + twitterID + "/status/" + response["data"][i]["id"];
+        return [name + ' | ' + group + ' ' + latestTweet, id];
+      }
+    }
   }
 }
