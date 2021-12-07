@@ -15,7 +15,7 @@ function getAllInformation() {
   if (sheet.getFilter()){
      sheet.getFilter().remove();
   }
-  sheet.getRange(2,7,lastRow - 1,6).clearContent();
+  sheet.getRange(2,7,lastRow - 1,7).clearContent();
 
   var twitterInfo = [];
   // 100件ごとにTwitter情報取得
@@ -43,9 +43,10 @@ function getAllInformation() {
           // 10件で失敗した場合、1件ずつ取得
           for(var k = 0; k < 10; k = k + 1){
             if(!getTwitterInformation(twitterInfo, sheet.getRange(i + j + k + 1,6).getValue(), i + j + k, 1)){
-              twitterInfo.push([null,null,null,null,null,null])
+              twitterInfo.push([null,null,null,null,null,null,null])
               sheet.getRange(i + j + k + 1,1,1,12).setBackground('#00ffff');
-              Logger.log("No." + (i + j + k + 1) + " " + sheet.getRange(i + j + k　+ 1,6).getValue());
+              var pastTwitterID = sheet.getRange(i + j + k　+ 1,6).getValue()
+              Logger.log("No." + (i + j + k + 1) + " " + pastTwitterID);
             }
           }
         }
@@ -53,16 +54,16 @@ function getAllInformation() {
     }
   }
   // 全データ貼り付け
-  sheet.getRange(2,7,lastRow - 1,6).setValues(twitterInfo);
+  sheet.getRange(2,7,lastRow - 1,7).setValues(twitterInfo);
 
   // フィルター作成
-  sheet.getRange(1,1,lastRow,12).createFilter();
+  sheet.getRange(1,1,lastRow,13).createFilter();
 
   // データ集計-グループ
   const groupSheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName('データ集計-グループ');
-  groupSheet.getRange("A1").setValue("=query('アイドル一覧'!$A$1:$K$" + (lastRow + 1) + ",\"select A,avg(H),count(A) group by A order by avg(H) desc label A 'グループ名',avg(H) '平均フォロワー数',count(A) 'メンバー数' format avg(H) '#'\")");
-  groupSheet.getRange("E1").setValue("=query('アイドル一覧'!$A$1:$K$" + (lastRow + 1) + ",\"select A,max(H)/min(H),count(A) group by A order by max(H)/min(H) desc label A 'グループ名',max(H)/min(H) 'フォロワー数最大/最小',count(A) 'メンバー数' format max(H)/min(H) '#.00'\")");
-  groupSheet.getRange("I1").setValue("=query('アイドル一覧'!$A$1:$K$" + (lastRow + 1) + ",\"select A,avg(I),count(A) group by A order by avg(I) desc label A 'グループ名',avg(I) '平均ツイート数',count(A) 'メンバー数' format avg(I) '#'\")");
+  groupSheet.getRange("A1").setValue("=query('アイドル一覧'!$A$1:$K$" + lastRow + ",\"select A,avg(H),count(A) group by A order by avg(H) desc label A 'グループ名',avg(H) '平均フォロワー数',count(A) 'メンバー数' format avg(H) '#'\")");
+  groupSheet.getRange("E1").setValue("=query('アイドル一覧'!$A$1:$K$" + lastRow + ",\"select A,max(H)/min(H),count(A) group by A order by max(H)/min(H) desc label A 'グループ名',max(H)/min(H) 'フォロワー数最大/最小',count(A) 'メンバー数' format max(H)/min(H) '#.00'\")");
+  groupSheet.getRange("I1").setValue("=query('アイドル一覧'!$A$1:$K$" + lastRow + ",\"select A,avg(I),count(A) group by A order by avg(I) desc label A 'グループ名',avg(I) '平均ツイート数',count(A) 'メンバー数' format avg(I) '#'\")");
   groupSheet.getRangeList(["A1:C1","E1:G1","I1:K1"]).setBackground('#ffd700');
   groupSheet.getRangeList(["A1:C1","E1:G1","I1:K1"]).setFontWeight("bold");
 
@@ -86,30 +87,30 @@ function getAllInformation() {
 }
 
 function getTwitterInformation(twitterInfo, twitterIDs, startRow, num){
-  var url = "https://api.twitter.com/2/users/by?usernames=" + twitterIDs + "&user.fields=public_metrics,description,verified,protected";
-  var options = {
-    "method": "get",
-    "muteHttpExceptions" : true,
-    "headers": {
-      "authorization": "Bearer " + PropertiesService.getScriptProperties().getProperty('BearerToken')
-    },
-  };
-  var response = JSON.parse(UrlFetchApp.fetch(url, options));
+  const response = client.UsersLookupUsernames([twitterIDs],null,"public_metrics,description,verified,protected");
   if(response["errors"]){
     return false;
   }
   
   for(var i = 0; i < num; i++){
-    var name = response["data"][i]["name"];
-    var followers_count = response["data"][i]["public_metrics"]["followers_count"];
-    var tweet_count = response["data"][i]["public_metrics"]["tweet_count"];
-    var verified = response["data"][i]["verified"];
-    if (verified) {verified = "認証"} else {verified = ""};
-    var protected = response["data"][i]["protected"];
-    if (protected) {protected = "非公開"} else {protected = ""};
-    var description = response["data"][i]["description"].replace(/[\r\n]+/g," ");
-
-    twitterInfo.push([name,followers_count,tweet_count,verified,protected,description])
+    const name = response["data"][i]["name"];
+    const followers_count = response["data"][i]["public_metrics"]["followers_count"];
+    const tweet_count = response["data"][i]["public_metrics"]["tweet_count"];
+    let verified = response["data"][i]["verified"];
+    let protected = response["data"][i]["protected"];
+    const id = response["data"][i]["id"];
+    const description = response["data"][i]["description"].replace(/[\r\n]+/g," ");
+    if (verified) {
+      verified = "認証"
+    } else {
+      verified = ""
+    };
+    if (protected) {
+      protected = "非公開"
+    } else {
+      protected = ""
+    };
+    twitterInfo.push([name,followers_count,tweet_count,verified,protected,id,description])
   }
   return true;
 }

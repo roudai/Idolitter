@@ -1,20 +1,20 @@
 // 認証用インスタンス
-var twitter = TwitterWebService.getInstance(
+const client = TwitterClient.getInstance(
   PropertiesService.getScriptProperties().getProperty('consumer_key'),
   PropertiesService.getScriptProperties().getProperty('consumer_secret')
 );
 
 // 認証
 function authorize() {
-  twitter.authorize();
+  client.authorize();
 }
 
 // 認証解除
 function reset() {
-  twitter.reset();
+  client.reset();
 }
 
 // 認証後のコールバック
 function authCallback(request) {
-  return twitter.authCallback(request);
+  return client.authCallback(request);
 }
