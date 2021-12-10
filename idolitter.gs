@@ -161,22 +161,29 @@ function replyTweet(){
           //名字
           if(String(lastname[j]).match(message)){
             matchData.push([group[j],twitterID[j],twitterName[j]]);
+            continue;
           }
           //名前
           if(String(name[j]).match(message)){
             matchData.push([group[j],twitterID[j],twitterName[j]]);
+            continue;
           }
           //名字読み
           if(String(lastnameRead[j]).match(message)){
             matchData.push([group[j],twitterID[j],twitterName[j]]);
+            continue;
           }
           //名前読み
           if(String(nameRead[j]).match(message)){
             matchData.push([group[j],twitterID[j],twitterName[j]]);
+            continue;
           }
         }
       }
-      const rand = Math.floor(Math.random() * (matchData.length - 1) + 1);
+      if(matchData.length == 0){
+        continue;
+      }
+      const rand = Math.floor(Math.random() * matchData.length);
       const pickGroup = matchData[rand][0];
       const pickTwitterID = matchData[rand][1];
       const pickTwitterName = String(matchData[rand][2]);
