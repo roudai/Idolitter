@@ -72,23 +72,38 @@ function checkAccount() {
         if(!getTwitterPass(sheet.getRange(i + j + 1,6,getNum,1).getValues().join())){
           // 10件で失敗した場合、1件ずつ取得
           for(var k = 0; k < 10; k = k + 1){
+            let response;
             if(!getTwitterPass(sheet.getRange(i + j + k + 1,6).getValue(), errorID)){
-              var twitterID = sheet.getRange(i + j + k + 1,6,getNum,1).getValue();
-              var twitterName = sheet.getRange(i + j + k + 1,7,getNum,1).getValue();
-              var group = sheet.getRange(i + j + k + 1,1,getNum,1).getValue();
-              if(getTwitterChange(sheet.getRange(i + j + k + 1,12,getNum,1).getValue(), newID)){
-                if(name.match(group)){
-                  client.postTweet("【ユーザー名変更】" + twitterName + ' ' + twitterID + ' ⇒ ' + newID[0]);
+              var pastTweet = sheet.getRange(i + j + k + 1,14,1,1).getValue();
+              if(pastTweet){
+                continue;
+              }
+              var twitterID = sheet.getRange(i + j + k + 1,6,1,1).getValue();
+              var twitterName = sheet.getRange(i + j + k + 1,7,1,1).getValue();
+              var group = sheet.getRange(i + j + k + 1,1,1,1).getValue();
+              var userID = sheet.getRange(i + j + k + 1,12,1,1).getValue();
+              if(!userID){
+                if(twitterName.match(group)){
+                  response = client.postTweet("【アカウント所在不明】" + twitterName + ' ' + twitterID);
                 }else{
-                  client.postTweet("【ユーザー名変更】" + twitterName + ' | ' + group + ' ' + twitterID + ' ⇒ ' + newID[0]);
+                  response = client.postTweet("【アカウント所在不明】" + twitterName + ' | ' + group + ' ' + twitterID);
                 }
-              } else {
-                if(name.match(group)){
-                  client.postTweet("【アカウント削除】" + twitterName + ' ' + twitterID);
-                }else{
-                  client.postTweet("【アカウント削除】" + twitterName + ' | ' + group + ' ' + twitterID);
-                }
-              };
+              }else{
+                if(getTwitterChange(userID, newID)){
+                  if(twitterName.match(group)){
+                    response = client.postTweet("【ユーザー名変更】" + twitterName + ' ' + twitterID + ' ⇒ ' + newID[0]);
+                  }else{
+                    response = client.postTweet("【ユーザー名変更】" + twitterName + ' | ' + group + ' ' + twitterID + ' ⇒ ' + newID[0]);
+                  }
+                } else {
+                  if(twitterName.match(group)){
+                    response = client.postTweet("【アカウント削除】" + twitterName + ' ' + twitterID);
+                  }else{
+                    response = client.postTweet("【アカウント削除】" + twitterName + ' | ' + group + ' ' + twitterID);
+                  }
+                };
+              }
+              sheet.getRange(i + j + k + 1,14,1,1).setValue("https://twitter.com/Idol_itter/status/" + response["data"]["id"]);
             }
           }
         }

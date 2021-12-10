@@ -57,7 +57,7 @@ function getAllInformation() {
   sheet.getRange(2,7,lastRow - 1,7).setValues(twitterInfo);
 
   // フィルター作成
-  sheet.getRange(1,1,lastRow,13).createFilter();
+  sheet.getRange(1,1,lastRow,14).createFilter();
 
   // データ集計-グループ
   const groupSheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName('データ集計-グループ');
@@ -80,10 +80,14 @@ function getAllInformation() {
 
   // 取得差分
   sheet.getRange("H:I").copyTo(diffSheet.getRange("F:G"));
-  diffSheet.getRange("I1").setValue("=query($A$1:$G$" + lastRow + ",\"select A,B,C,F-D order by F-D desc label F-D 'フォロワー増減'\")");
-  diffSheet.getRange("N1").setValue("=query($A$1:$G$" + lastRow + ",\"select A,B,C,G-E order by G-E desc label G-E 'ツイート増減'\")");
-  diffSheet.getRangeList(["I1:L1","N1:Q1"]).setBackground('#ffd700');
-  diffSheet.getRangeList(["I1:L1","N1:Q1"]).setFontWeight("bold");
+  diffSheet.getRange("I1").setValue("=query($A$1:$G$" + lastRow + ",\"select A,B,C,D,F,F-D order by F-D desc label D '前フォロワー数', F '後フォロワー数', F-D 'フォロワー増減'\")");
+  diffSheet.getRange("P1").setValue("=query($A$1:$G$" + lastRow + ",\"select A,B,C,E,G,G-E order by G-E desc label E '前ツイート数', G '後ツイート数', G-E 'ツイート増減'\")");
+  diffSheet.getRangeList(["I1:N1","P1:U1"]).setBackground('#ffd700');
+  diffSheet.getRangeList(["I1:N1","P1:U1"]).setFontWeight("bold");
+
+  // ランキングツイート
+  tweetRanking("follower");
+  tweetRanking("tweet");
 }
 
 function getTwitterInformation(twitterInfo, twitterIDs, startRow, num){
@@ -113,4 +117,49 @@ function getTwitterInformation(twitterInfo, twitterIDs, startRow, num){
     twitterInfo.push([name,followers_count,tweet_count,verified,protected,id,description])
   }
   return true;
+}
+
+function tweetRanking(type){
+  const date = new Date();
+  const today = date.getMonth() + 1 + "月" + date.getDate() - 1 + "日";
+
+  const diffSheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName('取得差分');
+  let title,group,name,increase,newline;
+  if(type == "follower"){
+    title = "【" + today + " フォロワー数増ランキング】" + "\n"
+    group = diffSheet.getRange("I2:I11").getValues();
+    name = diffSheet.getRange("K2:K11").getValues();
+    increase = diffSheet.getRange("N2:N11").getValues();
+    newline = "人\n"
+  }else if(type == "tweet"){
+    title = "【" + today + " ツイート数ランキング】" + "\n"
+    group = diffSheet.getRange("P2:P11").getValues();
+    name = diffSheet.getRange("R2:R11").getValues();
+    increase = diffSheet.getRange("U2:U11").getValues();
+    newline = "\n"
+  }
+
+  let tweetId,response,tweet;
+  for(let i = 0; i < 10; i++){
+    if(!tweet){
+      tweet = title;
+    }
+    if(String(name[i]).match(group[i])){
+      tweet = tweet + (i + 1) + "位 " + String(name[i]).replace("@"," ") + " " + increase[i] + newline;
+    }else{
+      tweet = tweet + (i + 1) + "位 " + String(name[i]).replace("@"," ") + "(" + group[i] + ") " + increase[i] + newline;
+    }
+    if(tweet.length > 140){
+      tweet = tweet.slice(0,tweet.indexOf((i + 1) + "位 "));
+      if(tweetId == ""){
+        response = client.postTweet(tweet);        
+      }else{
+        response = client.postTweet(tweet, tweetId);
+      }
+      tweetId = response["data"]["id"];
+      tweet = "";
+      i = i - 1;
+    }
+  }
+  client.postTweet(tweet, tweetId);
 }
