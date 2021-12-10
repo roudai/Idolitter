@@ -131,3 +131,62 @@ function getTwitterChange(userID, newID){
   newID.push(response["data"]["username"]);
   return true;
 }
+
+function replyTweet(){
+  var now = new Date();
+  var before5min_unix = now.getTime() - 60000; //ミリ秒なので(300秒*1000)
+  var before5min = new Date(before5min_unix);
+
+  let start_time = Utilities.formatDate(before5min, 'UTC', "yyyy-MM-dd'T'HH:mm:ss'Z'");
+  let response = client.findMentionTweet('1458460477630353409',start_time);
+  Logger.log(response);
+  
+  let matchData = [];
+  if(response["meta"]["result_count"] > 0){
+    const sh = SpreadsheetApp.getActiveSpreadsheet().getSheetByName("アイドル一覧");
+    const lastRow = sh.getLastRow();
+    const group = sh.getRange(2,1,lastRow - 1,1).getValues();
+    const lastname = sh.getRange(2,2,lastRow - 1,1).getValues();
+    const name = sh.getRange(2,3,lastRow - 1,1).getValues();
+    const lastnameRead = sh.getRange(2,4,lastRow - 1,1).getValues();
+    const nameRead = sh.getRange(2,5,lastRow - 1,1).getValues();
+    const twitterID = sh.getRange(2,6,lastRow - 1,1).getValues();
+    const twitterName = sh.getRange(2,7,lastRow - 1,1).getValues();
+    
+    for(i = 0; i < response["meta"]["result_count"]; i++){
+      const tweetID = response["data"][i]["id"];
+      const message = response["data"][i]["text"].replace("@Idol_itter ","");
+      if(message.length <= 10){
+        for(var j = 1; j <= lastRow; j = j + 1){
+          //名字
+          if(String(lastname[j]).match(message)){
+            matchData.push([group[j],twitterID[j],twitterName[j]]);
+          }
+          //名前
+          if(String(name[j]).match(message)){
+            matchData.push([group[j],twitterID[j],twitterName[j]]);
+          }
+          //名字読み
+          if(String(lastnameRead[j]).match(message)){
+            matchData.push([group[j],twitterID[j],twitterName[j]]);
+          }
+          //名前読み
+          if(String(nameRead[j]).match(message)){
+            matchData.push([group[j],twitterID[j],twitterName[j]]);
+          }
+        }
+      }
+      const rand = Math.floor(Math.random() * (matchData.length - 1) + 1);
+      const pickGroup = matchData[rand][0];
+      const pickTwitterID = matchData[rand][1];
+      const pickTwitterName = String(matchData[rand][2]);
+
+      if(pickTwitterName.match(pickGroup)){
+        client.postTweet(pickTwitterID + " " + pickTwitterName,tweetID);
+      }else{
+        client.postTweet(pickTwitterID + " " + pickTwitterName + " | " + pickGroup,tweetID);
+      }
+      matchData = [];
+    }
+  }
+}
