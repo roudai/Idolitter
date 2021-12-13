@@ -19,7 +19,7 @@ function generatePostMessage(){
 
   const response = client.UsersLookupUsernames([twitterID],"pinned_tweet_id");
 
-  const name = response["data"][0]["name"].replace("@"," ");
+  const name = response["data"][0]["name"].replace("@"," ").replace("＠"," ");
   const id = response["data"][0]["id"];
   const pinned_tweet_id = response["data"][0]["pinned_tweet_id"];
 
@@ -49,8 +49,8 @@ function checkAccount() {
   let errorID = [];
   let newID = [];
   // 100件ごとにTwitter情報取得
-  for(var i = 1; i <= lastRow; i = i + 100){
-    var getNum;
+  for(let i = 1; i <= lastRow; i = i + 100){
+    let getNum;
     if(lastRow - i - 1 >= 100 || lastRow % 100 == 1){
       getNum = 100;
     }else if(lastRow % 100 == 0){
@@ -60,7 +60,7 @@ function checkAccount() {
     }
     if(!getTwitterPass(sheet.getRange(i + 1,6,getNum,1).getValues().join())){
       // 100件で失敗した場合、10件ごとに取得
-      for(var j = 0; j < 100 ; j = j + 10){
+      for(let j = 0; j < 100 ; j = j + 10){
         if(lastRow - i - j >= 10 || lastRow % 10 == 1){
           getNum = 10;
         }else if(lastRow % 10 == 0){
@@ -71,32 +71,34 @@ function checkAccount() {
         }
         if(!getTwitterPass(sheet.getRange(i + j + 1,6,getNum,1).getValues().join())){
           // 10件で失敗した場合、1件ずつ取得
-          for(var k = 0; k < 10; k = k + 1){
+          for(let k = 0; k < 10; k = k + 1){
             let response;
             if(!getTwitterPass(sheet.getRange(i + j + k + 1,6).getValue(), errorID)){
-              var pastTweet = sheet.getRange(i + j + k + 1,14,1,1).getValue();
+              let pastTweet = sheet.getRange(i + j + k + 1,14,1,1).getValue();
               if(pastTweet){
                 continue;
               }
-              var twitterID = sheet.getRange(i + j + k + 1,6,1,1).getValue();
-              var twitterName = sheet.getRange(i + j + k + 1,7,1,1).getValue();
-              var group = sheet.getRange(i + j + k + 1,1,1,1).getValue();
-              var userID = sheet.getRange(i + j + k + 1,12,1,1).getValue();
+              let twitterID = sheet.getRange(i + j + k + 1,6,1,1).getValue();
+              let twitterName = sheet.getRange(i + j + k + 1,7,1,1).getValue();
+              let group = sheet.getRange(i + j + k + 1,1,1,1).getValue();
+              let userID = sheet.getRange(i + j + k + 1,12,1,1).getValue();
               if(!userID){
-                if(twitterName.match(group)){
+                if(nameGroupMatch(twitterName,group)){
                   response = client.postTweet("【アカウント所在不明】" + twitterName + ' ' + twitterID);
                 }else{
                   response = client.postTweet("【アカウント所在不明】" + twitterName + ' | ' + group + ' ' + twitterID);
                 }
               }else{
                 if(getTwitterChange(userID, newID)){
-                  if(twitterName.match(group)){
+                  if(nameGroupMatch(twitterName,group)){
                     response = client.postTweet("【ユーザー名変更】" + twitterName + ' ' + twitterID + ' ⇒ ' + newID[0]);
                   }else{
-                    response = client.postTweet("【ユーザー名変更】" + twitterName + ' | ' + group + ' ' + twitterID + ' ⇒ ' + newID[0]);
+                    response = client.postTweet("【ユーザー名変更】" + twitterName + ' | ' + group + ' ' + twitterID + ' ⇒ ' + newID[0]); 
                   }
+                  sheet.getRange(i + j + k + 1,6,1,1).setValue(newID[0]);
+                  newID = [];
                 } else {
-                  if(twitterName.match(group)){
+                  if(nameGroupMatch(twitterName,group)){
                     response = client.postTweet("【アカウント削除】" + twitterName + ' ' + twitterID);
                   }else{
                     response = client.postTweet("【アカウント削除】" + twitterName + ' | ' + group + ' ' + twitterID);
@@ -133,9 +135,9 @@ function getTwitterChange(userID, newID){
 }
 
 function replyTweet(){
-  var now = new Date();
-  var before5min_unix = now.getTime() - 60000; //ミリ秒なので(300秒*1000)
-  var before5min = new Date(before5min_unix);
+  const now = new Date();
+  const before5min_unix = now.getTime() - 60000; //ミリ秒なので(300秒*1000)
+  const before5min = new Date(before5min_unix);
 
   let start_time = Utilities.formatDate(before5min, 'UTC', "yyyy-MM-dd'T'HH:mm:ss'Z'");
   let response = client.findMentionTweet('1458460477630353409',start_time);
@@ -157,7 +159,7 @@ function replyTweet(){
       const tweetID = response["data"][i]["id"];
       const message = response["data"][i]["text"].replace("@Idol_itter ","");
       if(message.length <= 10){
-        for(var j = 1; j <= lastRow; j = j + 1){
+        for(let j = 1; j <= lastRow; j = j + 1){
           //名字
           if(String(lastname[j]).match(message)){
             matchData.push([group[j],twitterID[j],twitterName[j]]);

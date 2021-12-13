@@ -12,12 +12,10 @@ function setTrigger(){
 
 //トリガー削除
 function delTrigger() {
-
   const triggers = ScriptApp.getProjectTriggers();
   for(const trigger of triggers){
     if(trigger.getHandlerFunction() == "getAllInformation"){
       ScriptApp.deleteTrigger(trigger);
     }
   }
-  
 }

@@ -11,16 +11,16 @@ function getAllInformation() {
   diffSheet.getRange("A1:E1").setBackground('#adff2f');
 
 　// 最終行取得、現データ削除
-  var lastRow = sheet.getLastRow();
+  const lastRow = sheet.getLastRow();
   if (sheet.getFilter()){
      sheet.getFilter().remove();
   }
   sheet.getRange(2,7,lastRow - 1,7).clearContent();
 
-  var twitterInfo = [];
+  let twitterInfo = [];
   // 100件ごとにTwitter情報取得
-  for(var i = 1; i <= lastRow; i = i + 100){
-    var getNum;
+  for(let i = 1; i <= lastRow; i = i + 100){
+    let getNum;
     if(lastRow - i - 1 >= 100 || lastRow % 100 == 1){
       getNum = 100;
     }else if(lastRow % 100 == 0){
@@ -30,7 +30,7 @@ function getAllInformation() {
     }
     if(!getTwitterInformation(twitterInfo, sheet.getRange(i + 1,6,getNum,1).getValues().join(), i, getNum)){
       // 100件で失敗した場合、10件ごとに取得
-      for(var j = 0; j < 100 ; j = j + 10){
+      for(let j = 0; j < 100 ; j = j + 10){
         if(lastRow - i - j >= 10 || lastRow % 10 == 1){
           getNum = 10;
         }else if(lastRow % 10 == 0){
@@ -41,11 +41,11 @@ function getAllInformation() {
         }
         if(!getTwitterInformation(twitterInfo, sheet.getRange(i + j + 1,6,getNum,1).getValues().join(), i + j, getNum)){
           // 10件で失敗した場合、1件ずつ取得
-          for(var k = 0; k < 10; k = k + 1){
+          for(let k = 0; k < 10; k = k + 1){
             if(!getTwitterInformation(twitterInfo, sheet.getRange(i + j + k + 1,6).getValue(), i + j + k, 1)){
               twitterInfo.push([null,null,null,null,null,null,null])
               sheet.getRange(i + j + k + 1,1,1,12).setBackground('#00ffff');
-              var pastTwitterID = sheet.getRange(i + j + k　+ 1,6).getValue()
+              const pastTwitterID = sheet.getRange(i + j + k　+ 1,6).getValue()
               Logger.log("No." + (i + j + k + 1) + " " + pastTwitterID);
             }
           }
@@ -96,7 +96,7 @@ function getTwitterInformation(twitterInfo, twitterIDs, startRow, num){
     return false;
   }
   
-  for(var i = 0; i < num; i++){
+  for(let i = 0; i < num; i++){
     const name = response["data"][i]["name"];
     const followers_count = response["data"][i]["public_metrics"]["followers_count"];
     const tweet_count = response["data"][i]["public_metrics"]["tweet_count"];
@@ -121,7 +121,7 @@ function getTwitterInformation(twitterInfo, twitterIDs, startRow, num){
 
 function tweetRanking(type){
   const date = new Date();
-  const today = date.getMonth() + 1 + "月" + date.getDate() - 1 + "日";
+  const today = (date.getMonth() + 1) + "月" + (date.getDate() - 1) + "日";
 
   const diffSheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName('取得差分');
   let title,group,name,increase,newline;
@@ -139,15 +139,16 @@ function tweetRanking(type){
     newline = "\n"
   }
 
-  let tweetId,response,tweet;
+  let tweetId,response,tweet, rename;
   for(let i = 0; i < 10; i++){
     if(!tweet){
       tweet = title;
     }
-    if(String(name[i]).match(group[i])){
-      tweet = tweet + (i + 1) + "位 " + String(name[i]).replace("@"," ") + " " + increase[i] + newline;
+    rename = String(name[i]).replace("@"," ").replace("＠"," ");
+    if(nameGroupMatch(name[i],group[i])){
+      tweet = tweet + (i + 1) + "位 " + rename + " " + increase[i] + newline;
     }else{
-      tweet = tweet + (i + 1) + "位 " + String(name[i]).replace("@"," ") + "(" + group[i] + ") " + increase[i] + newline;
+      tweet = tweet + (i + 1) + "位 " + rename + "(" + group[i] + ") " + increase[i] + newline;
     }
     if(tweet.length > 140){
       tweet = tweet.slice(0,tweet.indexOf((i + 1) + "位 "));
