@@ -3,7 +3,7 @@
 
 ## 元ネタノート
 [アイドルグループ800組・4000人を集計してみた](https://note.com/roudainet/n/n6c1082ae5781)  
-[アイドルグループ800組・4000人を集計してみた 後編](https://note.com/roudainet/n/n69c151f82ed)  
+[アイドルグループ800組・4000人を集計してみた 後編](https://note.com/roudainet/n/n69c151f82edf)  
 [スプレッドシート](https://docs.google.com/spreadsheets/d/1-WiWZ9VZ9r9Pr8UoHNeEBKx0TDzIqlFeEfm8mJXYKfQ/edit#gid=1649831763)
 
 ## 動作環境
