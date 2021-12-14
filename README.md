@@ -2,7 +2,7 @@
 いわゆる地下アイドルグループに所属するアイドルを監視するTwitter Bot
 
 ## Twitterアカウント
-[Idolitter](https://twitter.com/Idol_itter)
+[@Idol_itter](https://twitter.com/Idol_itter)
 
 アイコン提供：[@w_ty_OvO](https://twitter.com/w_ty_OvO)
 
