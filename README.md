@@ -3,6 +3,7 @@
 
 ## Twitterアカウント
 [Idolitter](https://twitter.com/Idol_itter)
+
 アイコン提供：[@w_ty_OvO](https://twitter.com/w_ty_OvO)
 
 ## 元ネタノート
@@ -34,3 +35,4 @@ Google Apps Script、スプレッドシート
 下記投稿フォーム、またはツイッターアカウントへの返信、DMでも情報提供をお待ちしています。
 
 [投稿フォーム](https://forms.gle/LgtmavksDADbR8uLA)
+
