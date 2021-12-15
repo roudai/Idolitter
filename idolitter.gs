@@ -66,7 +66,7 @@ function checkAccount() {
       // 10件で失敗した場合、1件ずつ取得
       for(let k = 0; k < 10; k = k + 1){
         if(getTwitterPass(sheet.getRange(i + j + k + 1,6).getValue(), errorID)){
-          // 取得に成功した場合、次のループ
+          // 1件で成功した場合、次のループ
           continue;
         }
         if(sheet.getRange(i + j + k + 1,14,1,1).getValue()){

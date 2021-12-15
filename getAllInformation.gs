@@ -7,51 +7,45 @@ function getAllInformation() {
 
   // 現データコピー
   if(sheet.getRange(2,7).getValue() != ""){
-   sheet.getRange("A:A").copyTo(diffSheet.getRange("A:A"));
+    sheet.getRange("A:A").copyTo(diffSheet.getRange("A:A"));
     sheet.getRange("F:I").copyTo(diffSheet.getRange("B:E"));
     diffSheet.getRange("A1:E1").setBackground('#adff2f');
   }
 
 　// 最終行取得、現データ削除
   const lastRow = sheet.getLastRow();
-  if (sheet.getFilter()){
+  if(sheet.getFilter()){
      sheet.getFilter().remove();
   }
   sheet.getRange(2,7,lastRow - 1,7).clearContent();
 
   let twitterInfo = [];
+  let getNum;
   // 100件ごとにTwitter情報取得
   for(let i = 1; i <= lastRow; i = i + 100){
-    let getNum;
-    if(lastRow - i - 1 >= 100 || lastRow % 100 == 1){
-      getNum = 100;
-    }else if(lastRow % 100 == 0){
-      getNum = 99;
-    }else{
-      getNum = lastRow % 100 - 1;
+    getNum = getNum_100(i, lastRow);
+    if(getTwitterInformation(twitterInfo, sheet.getRange(i + 1,6,getNum,1).getValues().join(), i, getNum)){
+      // 100件で成功した場合、次のループ
+      continue;
     }
-    if(!getTwitterInformation(twitterInfo, sheet.getRange(i + 1,6,getNum,1).getValues().join(), i, getNum)){
-      // 100件で失敗した場合、10件ごとに取得
-      for(let j = 0; j < 100 ; j = j + 10){
-        if(lastRow - i - j >= 10 || lastRow % 10 == 1){
-          getNum = 10;
-        }else if(lastRow % 10 == 0){
-          getNum = 9;
-        }else{
-          getNum = lastRow % 10 - 1;
-          if(getNum < 0){getNum = 9}
+    // 100件で失敗した場合、10件ごとに取得
+    for(let j = 0; j < 100 ; j = j + 10){
+      getNum = getNum_10(i, j, lastRow);
+      if(getTwitterInformation(twitterInfo, sheet.getRange(i + j + 1,6,getNum,1).getValues().join(), i + j, getNum)){
+        // 10件で成功した場合、次のループ
+        continue;
+      }
+      // 10件で失敗した場合、1件ずつ取得
+      for(let k = 0; k < 10; k = k + 1){
+        if(!getTwitterInformation(twitterInfo, sheet.getRange(i + j + k + 1,6).getValue(), i + j + k, 1)){
+          // 1件で成功した場合、次のループ
+          continue;
         }
-        if(!getTwitterInformation(twitterInfo, sheet.getRange(i + j + 1,6,getNum,1).getValues().join(), i + j, getNum)){
-          // 10件で失敗した場合、1件ずつ取得
-          for(let k = 0; k < 10; k = k + 1){
-            if(!getTwitterInformation(twitterInfo, sheet.getRange(i + j + k + 1,6).getValue(), i + j + k, 1)){
-              twitterInfo.push([null,null,null,null,null,null,null])
-              sheet.getRange(i + j + k + 1,1,1,12).setBackground('#00ffff');
-              const pastTwitterID = sheet.getRange(i + j + k　+ 1,6).getValue()
-              Logger.log("No." + (i + j + k + 1) + " " + pastTwitterID);
-            }
-          }
-        }
+        // 1件で失敗した場合、nullをプッシュ、ログ出力
+        twitterInfo.push([null,null,null,null,null,null,null])
+        sheet.getRange(i + j + k + 1,1,1,12).setBackground('#00ffff');
+        const pastTwitterID = sheet.getRange(i + j + k　+ 1,6).getValue()
+        Logger.log("No." + (i + j + k + 1) + " " + pastTwitterID);
       }
     }
   }
