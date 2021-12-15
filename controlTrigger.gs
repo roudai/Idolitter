@@ -7,14 +7,14 @@ function setTrigger(){
   next.setMinutes(0);
   next.setSeconds(0);
   
-  ScriptApp.newTrigger('getAllInformation').timeBased().at(next).create();
+  ScriptApp.newTrigger('getAllInformation_try').timeBased().at(next).create();
 }
 
 //トリガー削除
 function delTrigger() {
   const triggers = ScriptApp.getProjectTriggers();
   for(const trigger of triggers){
-    if(trigger.getHandlerFunction() == "getAllInformation"){
+    if(trigger.getHandlerFunction() == "getAllInformation_try"){
       ScriptApp.deleteTrigger(trigger);
     }
   }
