@@ -6,7 +6,7 @@ function postUpdateStatus() {
   // ツイート
   client.postTweet(message)
   // フォロー
-  //client.createFollow('1458460477630353409', userId)
+  client.createFollow('1458460477630353409', userId)
 }
 
 function generatePostMessage(){
