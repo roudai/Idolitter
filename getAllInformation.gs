@@ -6,9 +6,11 @@ function getAllInformation() {
   sheet.getRange(2,1,sheet.getLastRow() - 1, sheet.getLastColumn()).sort([{column: 1, ascending: true},{column: 6, ascending: true}]);
 
   // 現データコピー
-  sheet.getRange("A:A").copyTo(diffSheet.getRange("A:A"));
-  sheet.getRange("F:I").copyTo(diffSheet.getRange("B:E"));
-  diffSheet.getRange("A1:E1").setBackground('#adff2f');
+  if(sheet.getRange(2,7).getValue() != ""){
+   sheet.getRange("A:A").copyTo(diffSheet.getRange("A:A"));
+    sheet.getRange("F:I").copyTo(diffSheet.getRange("B:E"));
+    diffSheet.getRange("A1:E1").setBackground('#adff2f');
+  }
 
 　// 最終行取得、現データ削除
   const lastRow = sheet.getLastRow();
