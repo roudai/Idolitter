@@ -48,67 +48,62 @@ function checkAccount() {
 
   let errorID = [];
   let newID = [];
+  let getNum;
   // 100件ごとにTwitter情報取得
   for(let i = 1; i <= lastRow; i = i + 100){
-    let getNum;
-    if(lastRow - i - 1 >= 100 || lastRow % 100 == 1){
-      getNum = 100;
-    }else if(lastRow % 100 == 0){
-      getNum = 99;
-    }else{
-      getNum = lastRow % 100 - 1;
+    getNum = getNum_100(i, lastRow);
+    if(getTwitterPass(sheet.getRange(i + 1,6,getNum,1).getValues().join())){
+      // 100件で成功した場合、次のループ
+      continue;
     }
-    if(!getTwitterPass(sheet.getRange(i + 1,6,getNum,1).getValues().join())){
-      // 100件で失敗した場合、10件ごとに取得
-      for(let j = 0; j < 100 ; j = j + 10){
-        if(lastRow - i - j >= 10 || lastRow % 10 == 1){
-          getNum = 10;
-        }else if(lastRow % 10 == 0){
-          getNum = 9;
-        }else{
-          getNum = lastRow % 10 - 1;
-          if(getNum < 0){getNum = 9}
+    // 100件で失敗した場合、10件ごとに取得
+    for(let j = 0; j < 100 ; j = j + 10){
+      getNum = getNum_10(i, j, lastRow);
+      if(getTwitterPass(sheet.getRange(i + j + 1,6,getNum,1).getValues().join())){
+        // 10件で成功した場合、次のループ
+        continue;
+      }
+      // 10件で失敗した場合、1件ずつ取得
+      for(let k = 0; k < 10; k = k + 1){
+        if(getTwitterPass(sheet.getRange(i + j + k + 1,6).getValue(), errorID)){
+          // 取得に成功した場合、次のループ
+          continue;
         }
-        if(!getTwitterPass(sheet.getRange(i + j + 1,6,getNum,1).getValues().join())){
-          // 10件で失敗した場合、1件ずつ取得
-          for(let k = 0; k < 10; k = k + 1){
-            let response;
-            if(!getTwitterPass(sheet.getRange(i + j + k + 1,6).getValue(), errorID)){
-              let pastTweet = sheet.getRange(i + j + k + 1,14,1,1).getValue();
-              if(pastTweet){
-                continue;
-              }
-              let twitterID = sheet.getRange(i + j + k + 1,6,1,1).getValue();
-              let twitterName = sheet.getRange(i + j + k + 1,7,1,1).getValue();
-              let group = sheet.getRange(i + j + k + 1,1,1,1).getValue();
-              let userID = sheet.getRange(i + j + k + 1,12,1,1).getValue();
-              if(!userID){
-                if(nameGroupMatch(twitterName,group)){
-                  response = client.postTweet("【アカウント所在不明】" + twitterName + ' ' + twitterID);
-                }else{
-                  response = client.postTweet("【アカウント所在不明】" + twitterName + ' | ' + group + ' ' + twitterID);
-                }
-              }else{
-                if(getTwitterChange(userID, newID)){
-                  if(nameGroupMatch(twitterName,group)){
-                    response = client.postTweet("【ユーザー名変更】" + twitterName + ' ' + twitterID + ' ⇒ ' + newID[0]);
-                  }else{
-                    response = client.postTweet("【ユーザー名変更】" + twitterName + ' | ' + group + ' ' + twitterID + ' ⇒ ' + newID[0]); 
-                  }
-                  sheet.getRange(i + j + k + 1,6,1,1).setValue(newID[0]);
-                  newID = [];
-                } else {
-                  if(nameGroupMatch(twitterName,group)){
-                    response = client.postTweet("【アカウント削除】" + twitterName + ' ' + twitterID);
-                  }else{
-                    response = client.postTweet("【アカウント削除】" + twitterName + ' | ' + group + ' ' + twitterID);
-                  }
-                };
-              }
-              sheet.getRange(i + j + k + 1,14,1,1).setValue("https://twitter.com/Idol_itter/status/" + response["data"]["id"]);
+        if(sheet.getRange(i + j + k + 1,14,1,1).getValue()){
+          // ツイート済みの場合、次のループ
+          continue;
+        }
+        let response;
+        let twitterID = sheet.getRange(i + j + k + 1,6,1,1).getValue();
+        let twitterName = sheet.getRange(i + j + k + 1,7,1,1).getValue();
+        let group = sheet.getRange(i + j + k + 1,1,1,1).getValue();
+        let userID = sheet.getRange(i + j + k + 1,12,1,1).getValue();
+        if(userID){
+          if(getTwitterChange(userID, newID)){
+            if(nameGroupMatch(twitterName,group)){
+              //response = client.postTweet("【ユーザー名変更】" + twitterName + ' ' + twitterID + ' ⇒ ' + newID[0]);
+              Logger.log("【ユーザー名変更】" + twitterName + ' ' + twitterID + ' ⇒ ' + newID[0])
+            }else{
+              //response = client.postTweet("【ユーザー名変更】" + twitterName + ' | ' + group + ' ' + twitterID + ' ⇒ ' + newID[0]); 
+              Logger.log("【ユーザー名変更】" + twitterName + ' | ' + group + ' ' + twitterID + ' ⇒ ' + newID[0]);
+            }
+            sheet.getRange(i + j + k + 1,6,1,1).setValue(newID[0]);
+            newID = [];
+          } else {
+            if(nameGroupMatch(twitterName,group)){
+              response = client.postTweet("【アカウント削除】" + twitterName + ' ' + twitterID);
+            }else{
+              response = client.postTweet("【アカウント削除】" + twitterName + ' | ' + group + ' ' + twitterID);
             }
           }
+        }else{
+          if(nameGroupMatch(twitterName,group)){
+            //response = client.postTweet("【アカウント所在不明】" + twitterName + ' ' + twitterID);
+          }else{
+            //response = client.postTweet("【アカウント所在不明】" + twitterName + ' | ' + group + ' ' + twitterID);
+          }
         }
+        sheet.getRange(i + j + k + 1,14,1,1).setValue("https://twitter.com/Idol_itter/status/" + response["data"]["id"]);
       }
     }
   }
