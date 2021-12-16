@@ -37,7 +37,7 @@ function getAllInformation() {
       }
       // 10件で失敗した場合、1件ずつ取得
       for(let k = 0; k < 10; k = k + 1){
-        if(!getTwitterInformation(twitterInfo, sheet.getRange(i + j + k + 1,6).getValue(), i + j + k, 1)){
+        if(getTwitterInformation(twitterInfo, sheet.getRange(i + j + k + 1,6).getValue(), i + j + k, 1)){
           // 1件で成功した場合、次のループ
           continue;
         }
