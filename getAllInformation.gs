@@ -144,7 +144,7 @@ function tweetRanking(type){
     if(nameGroupMatch(name[i],group[i])){
       tweet = tweet + (i + 1) + "位 " + rename + " " + increase[i] + newline;
     }else{
-      tweet = tweet + (i + 1) + "位 " + rename + "(" + group[i] + ") " + increase[i] + newline;
+      tweet = tweet + (i + 1) + "位 " + rename + " (" + group[i] + ") " + increase[i] + newline;
     }
     if(tweet.length > 140){
       tweet = tweet.slice(0,tweet.indexOf((i + 1) + "位 "));

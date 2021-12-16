@@ -83,7 +83,7 @@ function checkAccount() {
             if(nameGroupMatch(twitterName,group)){
               response = client.postTweet("【ユーザー名変更】" + twitterName + ' ' + twitterID + ' ⇒ ' + newID[0]);
             }else{
-              response = client.postTweet("【ユーザー名変更】" + twitterName + ' | ' + group + ' ' + twitterID + ' ⇒ ' + newID[0]); 
+              response = client.postTweet("【ユーザー名変更】" + twitterName + ' (' + group + ') ' + twitterID + ' ⇒ ' + newID[0]); 
             }
             sheet.getRange(i + j + k + 1,6,1,1).setValue(newID[0]);
             newID = [];
@@ -91,14 +91,14 @@ function checkAccount() {
             if(nameGroupMatch(twitterName,group)){
               response = client.postTweet("【アカウント削除】" + twitterName + ' ' + twitterID);
             }else{
-              response = client.postTweet("【アカウント削除】" + twitterName + ' | ' + group + ' ' + twitterID);
+              response = client.postTweet("【アカウント削除】" + twitterName + ' (' + group + ') ' + twitterID);
             }
           }
         }else{
           if(nameGroupMatch(twitterName,group)){
             response = client.postTweet("【アカウント所在不明】" + twitterName + ' ' + twitterID);
           }else{
-            response = client.postTweet("【アカウント所在不明】" + twitterName + ' | ' + group + ' ' + twitterID);
+            response = client.postTweet("【アカウント所在不明】" + twitterName + ' (' + group + ') ' + twitterID);
           }
         }
         sheet.getRange(i + j + k + 1,14,1,1).setValue("https://twitter.com/Idol_itter/status/" + response["data"]["id"]);
