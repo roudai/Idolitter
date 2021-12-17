@@ -120,36 +120,39 @@ function tweetRanking(type){
   const today = (date.getMonth() + 1) + "月" + (date.getDate() - 1) + "日";
 
   const diffSheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName('取得差分');
-  let title,group,name,increase,newline;
+  let title,group,name,increase;
   if(type == "follower"){
     title = "【" + today + " フォロワー数増ランキング】" + "\n"
     group = diffSheet.getRange("I2:I11").getValues();
     name = diffSheet.getRange("K2:K11").getValues();
     increase = diffSheet.getRange("N2:N11").getValues();
-    newline = "人\n"
   }else if(type == "tweet"){
     title = "【" + today + " ツイート数ランキング】" + "\n"
     group = diffSheet.getRange("P2:P11").getValues();
     name = diffSheet.getRange("R2:R11").getValues();
     increase = diffSheet.getRange("U2:U11").getValues();
-    newline = "\n"
   }
 
-  let tweetId,response,tweet, rename;
+  let tweetId,response,tweet,rename,reincrease;
   for(let i = 0; i < 10; i++){
     if(!tweet){
       tweet = title;
     }
     rename = String(name[i]).replace("@"," ").replace("＠"," ");
+    if(type == "follower"){
+      reincrease = increase[i] + "人";
+    }else if(type == "tweet"){
+      reincrease = increase[i];
+    }
     if(nameGroupMatch(name[i],group[i])){
-      tweet = tweet + (i + 1) + "位 " + rename + " " + increase[i] + newline;
+      tweet = tweet + (i + 1) + "位 " + reincrease + " " + rename + "\n";
     }else{
-      tweet = tweet + (i + 1) + "位 " + rename + " (" + group[i] + ") " + increase[i] + newline;
+      tweet = tweet + (i + 1) + "位 " + reincrease + " " + rename + " (" + group[i] + ")" + "\n";
     }
     if(tweet.length > 140){
       tweet = tweet.slice(0,tweet.indexOf((i + 1) + "位 "));
       if(tweetId == ""){
-        response = client.postTweet(tweet);        
+        response = client.postTweet(tweet);
       }else{
         response = client.postTweet(tweet, tweetId);
       }
