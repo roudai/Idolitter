@@ -8,7 +8,7 @@ function getAllInformation_try(){
       lastError = e;
       Logger.log(e);
     }
-    Utilities.sleep(3000);
+    Utilities.sleep(10000);
   }
   throw lastError;
 }
@@ -23,7 +23,7 @@ function postUpdateStatus_try(){
       lastError = e;
       Logger.log(e);
     }
-    Utilities.sleep(3000);
+    Utilities.sleep(10000);
   }
   throw lastError;
 }
@@ -38,7 +38,7 @@ function checkAccount_try() {
       lastError = e;
       Logger.log(e);
     }
-    Utilities.sleep(3000);
+    Utilities.sleep(10000);
   }
   throw lastError;
 }
