@@ -46,6 +46,8 @@ function checkAccount() {
   sheet.getRange(2,1,sheet.getLastRow() - 1, sheet.getLastColumn()).sort([{column: 1, ascending: true},{column: 6, ascending: true}]);
   const lastRow = sheet.getLastRow();
 
+  checkDeleteAccount(sheet, lastRow);
+
   let errorID = [];
   let newID = [];
   let getNum;
@@ -73,7 +75,6 @@ function checkAccount() {
           // ツイート済みの場合、次のループ
           continue;
         }
-        let response;
         let twitterID = sheet.getRange(i + j + k + 1,6,1,1).getValue();
         let twitterName = sheet.getRange(i + j + k + 1,7,1,1).getValue();
         let group = sheet.getRange(i + j + k + 1,1,1,1).getValue();
@@ -81,31 +82,54 @@ function checkAccount() {
         if(userID){
           if(getTwitterChange(userID, newID)){
             if(nameGroupMatch(twitterName,group)){
-              response = client.postTweet("【ユーザー名変更】" + twitterName + ' ' + twitterID + ' ⇒ ' + newID[0]);
+              client.postTweet("【ユーザー名変更】" + twitterName + ' ' + twitterID + ' ⇒ ' + newID[0]);
             }else{
-              response = client.postTweet("【ユーザー名変更】" + twitterName + ' (' + group + ') ' + twitterID + ' ⇒ ' + newID[0]); 
+              client.postTweet("【ユーザー名変更】" + twitterName + ' (' + group + ') ' + twitterID + ' ⇒ ' + newID[0]); 
             }
             sheet.getRange(i + j + k + 1,6,1,1).setValue(newID[0]);
-            text = "変更";
             newID = [];
           } else {
             if(nameGroupMatch(twitterName,group)){
-              response = client.postTweet("【アカウント削除】" + twitterName + ' ' + twitterID);
+              client.postTweet("【アカウント削除】" + twitterName + ' ' + twitterID);
             }else{
-              response = client.postTweet("【アカウント削除】" + twitterName + ' (' + group + ') ' + twitterID);
+              client.postTweet("【アカウント削除】" + twitterName + ' (' + group + ') ' + twitterID);
             }
-            text = "削除";
+            sheet.getRange(i + j + k + 1,14,1,1).setValue("削除");
           }
         }else{
           if(nameGroupMatch(twitterName,group)){
-            response = client.postTweet("【アカウント所在不明】" + twitterName + ' ' + twitterID);
+            client.postTweet("【アカウント所在不明】" + twitterName + ' ' + twitterID);
           }else{
-            response = client.postTweet("【アカウント所在不明】" + twitterName + ' (' + group + ') ' + twitterID);
+            client.postTweet("【アカウント所在不明】" + twitterName + ' (' + group + ') ' + twitterID);
           }
-          text = "不明";
+          sheet.getRange(i + j + k + 1,14,1,1).setValue("不明");
         }
-        sheet.getRange(i + j + k + 1,14,1,1).setValue(text);
+        
       }
+    }
+  }
+}
+
+function checkDeleteAccount(sheet, lastRow){
+  const twitterStatus = sheet.getRange(2,14,lastRow,1).getValues()
+  const twitterID = sheet.getRange(2,6,lastRow,1).getValues()
+
+  let errorID = [];
+  for(let i = 0; i < lastRow ; i = i + 1){
+    if(twitterStatus[i] != ""){
+      Logger.log(twitterID[i]);
+      if(getTwitterPass(String(twitterID[i]), errorID)){
+        // アカウントが存在した場合、削除を取り消し
+        sheet.getRange(i + 2,14).setValue(null);
+        let twitterName = sheet.getRange(i + 2,7).getValue();
+        let group = sheet.getRange(i + 2,1).getValue();
+
+        if(nameGroupMatch(twitterName,group)){
+          client.postTweet("【アカウント復活】" + twitterName + ' ' + twitterID[i]);
+        }else{
+          client.postTweet("【アカウント復活】" + twitterName + ' (' + group + ') ' + twitterID[i]);
+        }
+      };
     }
   }
 }
