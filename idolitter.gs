@@ -121,7 +121,9 @@ function checkDeleteAccount(sheet, lastRow){
       if(getTwitterPass(String(twitterID[i]), errorID)){
         // アカウントが存在した場合、削除を取り消し
         sheet.getRange(i + 2,14).setValue(null);
-        let twitterName = sheet.getRange(i + 2,7).getValue();
+
+        let response = client.UsersLookupUsernames([twitterID[i]])
+        let twitterName = response["data"][0]["name"];
         let group = sheet.getRange(i + 2,1).getValue();
 
         if(nameGroupMatch(twitterName,group)){
