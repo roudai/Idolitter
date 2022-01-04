@@ -3,7 +3,7 @@ function getAllInformation() {
   const diffSheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName('取得差分');
 
   // データ並び替え
-  sheet.getRange(2,1,sheet.getLastRow() - 1, sheet.getLastColumn()).sort([{column: 1, ascending: true},{column: 6, ascending: true}]);
+  sheet.getRange(2,1,sheet.getLastRow() - 1, sheet.getLastColumn()).sort([{column: 1, ascending: true},{column: 12, ascending: true}]);
 
   // 現データコピー
   if(sheet.getRange(2,7).getValue() != ""){

@@ -43,7 +43,7 @@ function checkAccount() {
   const sheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName('アイドル一覧');
 
   // データ並び替え
-  sheet.getRange(2,1,sheet.getLastRow() - 1, sheet.getLastColumn()).sort([{column: 1, ascending: true},{column: 6, ascending: true}]);
+  sheet.getRange(2,1,sheet.getLastRow() - 1, sheet.getLastColumn()).sort([{column: 1, ascending: true},{column: 12, ascending: true}]);
   const lastRow = sheet.getLastRow();
 
   checkDeleteAccount(sheet, lastRow);
