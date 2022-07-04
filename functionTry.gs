@@ -1,6 +1,6 @@
 function getAllInformation_try(){
   var lastError = null;
-  for(var i = 0; i < 3; i++) {
+  for(var i = 0; i < 10; i++) {
     try {
       getAllInformation();
       return;
@@ -8,7 +8,7 @@ function getAllInformation_try(){
       lastError = e;
       Logger.log(e);
     }
-    Utilities.sleep(10000);
+    Utilities.sleep(60000);
   }
   throw lastError;
 }
